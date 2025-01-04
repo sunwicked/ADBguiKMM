@@ -1,5 +1,6 @@
 # ADB GUI Desktop
 A modern Kotlin Multiplatform Desktop client for ADB commands, reimagined from the original Python adbGUI project.
+Desktop client for adb commands inspired from adb idea plugin for android studio
 
 ## Features
 1. ✅ ADB connect/disconnect
