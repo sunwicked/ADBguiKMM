@@ -11,6 +11,9 @@ A modern Kotlin Multiplatform Desktop client for ADB commands, reimagined from t
 7. 🚧 ADB install/uninstall
 8. 🚧 ADB push file
 
+## Screenshot
+![ADB GUI Desktop Main Window](screenshots/main_window.png)
+
 ## Setup Requirements
 1. Android SDK Platform Tools (ADB) must be installed and in your system PATH
 2. JDK 11 or higher
