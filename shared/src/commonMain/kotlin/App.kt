@@ -1,24 +1,7 @@
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,13 +12,16 @@ fun App() {
     var ipAddress by remember { mutableStateOf("") }
     var packageName by remember { mutableStateOf("") }
     var logOutput by remember { mutableStateOf("") }
+    var isRecording by remember { mutableStateOf(false) }
+    var isLogging by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val adbService = remember { AdbService() }
     
     MaterialTheme {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // IP Address Input Section
             Row(
@@ -60,34 +46,28 @@ fun App() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Action Buttons
+            // First Row of Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = { 
-                    scope.launch { logOutput = adbService.devices() }
-                }) {
+                Button(onClick = { scope.launch { logOutput = adbService.install("") } }) {
+                    Text("ADB Install")
+                }
+                Button(onClick = { scope.launch { logOutput = adbService.devices() } }) {
                     Text("ADB Devices")
                 }
-                Button(onClick = { 
-                    scope.launch { logOutput = adbService.disconnect() }
-                }) {
+                Button(onClick = { scope.launch { logOutput = adbService.disconnect() } }) {
                     Text("ADB Disconnect")
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+            // Second Row of Buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = { 
-                    scope.launch { logOutput = adbService.reboot() }
-                }) {
+                Button(onClick = { scope.launch { logOutput = adbService.reboot() } }) {
                     Text("ADB Reboot")
                 }
                 Button(onClick = { 
@@ -99,9 +79,67 @@ fun App() {
                 }) {
                     Text("ADB Clear")
                 }
+                Button(onClick = { scope.launch { logOutput = adbService.push("", "") } }) {
+                    Text("ADB Push")
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Screenshot and Screen Record Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(onClick = { 
+                    scope.launch { logOutput = adbService.screenshot("") }
+                }) {
+                    Text("Screenshot")
+                }
+                Button(onClick = { 
+                    scope.launch {
+                        if (!isRecording) {
+                            logOutput = adbService.startScreenRecord("")
+                        } else {
+                            logOutput = adbService.stopScreenRecord()
+                        }
+                        isRecording = !isRecording
+                    }
+                }) {
+                    Text(if (isRecording) "Stop Recording" else "Start Recording")
+                }
+            }
+
+            // Logcat Row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = { 
+                        scope.launch {
+                            if (!isLogging) {
+                                logOutput = adbService.startLogcat("")
+                            } else {
+                                logOutput = adbService.stopLogcat()
+                            }
+                            isLogging = !isLogging
+                        }
+                    },
+                    enabled = !isLogging
+                ) {
+                    Text("ADB Logcat")
+                }
+                Button(
+                    onClick = { 
+                        scope.launch {
+                            logOutput = adbService.stopLogcat()
+                            isLogging = false
+                        }
+                    },
+                    enabled = isLogging
+                ) {
+                    Text("Stop Logcat")
+                }
+            }
 
             // Package Name Input
             Row(
@@ -114,9 +152,19 @@ fun App() {
                     onValueChange = { packageName = it },
                     modifier = Modifier.weight(1f)
                 )
+                Button(
+                    onClick = { 
+                        scope.launch {
+                            if (packageName.isNotEmpty()) {
+                                logOutput = adbService.uninstall(packageName)
+                            }
+                        }
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Text("Uninstall")
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Log Output
             Text("Log Output:")
