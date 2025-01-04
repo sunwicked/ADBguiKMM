@@ -1,9 +1,13 @@
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -18,165 +22,283 @@ fun App() {
     val adbService = remember { AdbService() }
     
     MaterialTheme {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
         ) {
-            // IP Address Input Section
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Enter TV IP:", modifier = Modifier.width(100.dp))
-                TextField(
-                    value = ipAddress,
-                    onValueChange = { ipAddress = it },
-                    modifier = Modifier.weight(1f)
+                // Title
+                Text(
+                    "ADB GUI Desktop",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-                Button(
-                    onClick = { 
-                        scope.launch {
-                            logOutput = adbService.connect(ipAddress)
-                        }
-                    },
-                    modifier = Modifier.padding(start = 8.dp)
+
+                // Connection Card
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("ADB Connect")
-                }
-            }
-
-            // First Row of Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = { scope.launch { logOutput = adbService.install("") } }) {
-                    Text("ADB Install")
-                }
-                Button(onClick = { scope.launch { logOutput = adbService.devices() } }) {
-                    Text("ADB Devices")
-                }
-                Button(onClick = { scope.launch { logOutput = adbService.disconnect() } }) {
-                    Text("ADB Disconnect")
-                }
-            }
-
-            // Second Row of Buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = { scope.launch { logOutput = adbService.reboot() } }) {
-                    Text("ADB Reboot")
-                }
-                Button(onClick = { 
-                    scope.launch { 
-                        if (packageName.isNotEmpty()) {
-                            logOutput = adbService.clear(packageName)
-                        }
-                    }
-                }) {
-                    Text("ADB Clear")
-                }
-                Button(onClick = { scope.launch { logOutput = adbService.push("", "") } }) {
-                    Text("ADB Push")
-                }
-            }
-
-            // Screenshot and Screen Record Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(onClick = { 
-                    scope.launch { logOutput = adbService.screenshot("") }
-                }) {
-                    Text("Screenshot")
-                }
-                Button(onClick = { 
-                    scope.launch {
-                        if (!isRecording) {
-                            logOutput = adbService.startScreenRecord("")
-                        } else {
-                            logOutput = adbService.stopScreenRecord()
-                        }
-                        isRecording = !isRecording
-                    }
-                }) {
-                    Text(if (isRecording) "Stop Recording" else "Start Recording")
-                }
-            }
-
-            // Logcat Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Button(
-                    onClick = { 
-                        scope.launch {
-                            if (!isLogging) {
-                                logOutput = adbService.startLogcat("")
-                            } else {
-                                logOutput = adbService.stopLogcat()
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "📱 Device Connection",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        OutlinedTextField(
+                            value = ipAddress,
+                            onValueChange = { ipAddress = it },
+                            label = { Text("IP Address (e.g., 192.168.1.100)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true,
+                            trailingIcon = { Text(":5555") }
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.devices() } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Devices, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Devices")
                             }
-                            isLogging = !isLogging
-                        }
-                    },
-                    enabled = !isLogging
-                ) {
-                    Text("ADB Logcat")
-                }
-                Button(
-                    onClick = { 
-                        scope.launch {
-                            logOutput = adbService.stopLogcat()
-                            isLogging = false
-                        }
-                    },
-                    enabled = isLogging
-                ) {
-                    Text("Stop Logcat")
-                }
-            }
-
-            // Package Name Input
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Package:", modifier = Modifier.width(100.dp))
-                TextField(
-                    value = packageName,
-                    onValueChange = { packageName = it },
-                    modifier = Modifier.weight(1f)
-                )
-                Button(
-                    onClick = { 
-                        scope.launch {
-                            if (packageName.isNotEmpty()) {
-                                logOutput = adbService.uninstall(packageName)
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.connect(ipAddress) } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Link, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Connect")
+                            }
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.disconnect() } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.LinkOff, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Disconnect")
                             }
                         }
-                    },
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Text("Uninstall")
+                    }
                 }
-            }
 
-            // Log Output
-            Text("Log Output:")
-            Surface(
-                modifier = Modifier.fillMaxWidth().height(100.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                SelectionContainer {
-                    Text(
-                        text = logOutput,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                // Package Management Card
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "📦 Package Management",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        OutlinedTextField(
+                            value = packageName,
+                            onValueChange = { packageName = it },
+                            label = { Text("Package Name (e.g., com.example.app)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.install("") } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Add, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Install APK")
+                            }
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.clear(packageName) } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Clear, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Clear Data")
+                            }
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.uninstall(packageName) } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Delete, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Uninstall")
+                            }
+                        }
+                    }
+                }
+
+                // Device Actions Card
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "🛠️ Device Actions",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.reboot() } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Refresh, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Reboot")
+                            }
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.push("", "") } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.Upload, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Push File")
+                            }
+                        }
+                    }
+                }
+
+                // Capture Card
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "📷 Screen Capture",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { scope.launch { logOutput = adbService.screenshot("") } },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(Icons.Default.PhotoCamera, null)
+                                Spacer(Modifier.width(4.dp))
+                                Text("Screenshot")
+                            }
+                            Button(
+                                onClick = { 
+                                    scope.launch {
+                                        if (!isRecording) {
+                                            logOutput = adbService.startScreenRecord("")
+                                        } else {
+                                            logOutput = adbService.stopScreenRecord()
+                                        }
+                                        isRecording = !isRecording
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    if (isRecording) Icons.Default.Stop else Icons.Default.Videocam,
+                                    null
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(if (isRecording) "Stop Recording" else "Record Screen")
+                            }
+                        }
+                    }
+                }
+
+                // Logcat Card
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "📝 Logcat",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { 
+                                    scope.launch {
+                                        if (!isLogging) {
+                                            logOutput = adbService.startLogcat("")
+                                        } else {
+                                            logOutput = adbService.stopLogcat()
+                                        }
+                                        isLogging = !isLogging
+                                    }
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Icon(
+                                    if (isLogging) Icons.Default.Stop else Icons.Default.PlayArrow,
+                                    null
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(if (isLogging) "Stop Logcat" else "Start Logcat")
+                            }
+                        }
+                    }
+                }
+
+                // Console Output Card
+                ElevatedCard(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            "💻 Console Output",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        SelectionContainer(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = logOutput,
+                                modifier = Modifier.fillMaxWidth(),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
                 }
             }
         }
