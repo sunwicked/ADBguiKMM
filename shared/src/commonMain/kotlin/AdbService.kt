@@ -8,4 +8,9 @@ expect class AdbService {
     suspend fun clear(packageName: String): String
     suspend fun push(sourcePath: String, destPath: String): String
     suspend fun screenshot(path: String): String
+    suspend fun startScreenRecord(path: String): String
+    suspend fun stopScreenRecord(): String
+    suspend fun startLogcat(path: String): String
+    suspend fun stopLogcat(): String
+    suspend fun getPackageFromApk(apkPath: String): String
 } 
