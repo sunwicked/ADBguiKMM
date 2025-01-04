@@ -1,0 +1,34 @@
+# Gradle
+.gradle/
+build/
+local.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Kotlin
+*.class
+*.log
+*.ctxt
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Compose
+.compose/ 
