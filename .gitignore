@@ -31,4 +31,7 @@ ehthumbs.db
 Desktop.ini
 
 # Compose
-.compose/ 
+.compose/
+
+# Project specific
+.input/ 
